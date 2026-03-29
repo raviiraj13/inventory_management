@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nilkamal Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f0f; --surface:#141718; --surface2:#1c1f20; --surface3:#242829;
+  --border:#2a2f30; --accent:#f97316; --text:#e2e8f0; --text2:#94a3b8; --text3:#4b5563;
+  --green:#22c55e; --yellow:#eab308; --red:#ef4444; --blue:#3b82f6;
+  --nav-h:58px; --bnav-h:62px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.012) 39px,rgba(255,255,255,.012) 40px),
+  repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.012) 39px,rgba(255,255,255,.012) 40px)}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(13,15,15,.96);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:0 14px;z-index:300}
+.hamburger{width:38px;height:38px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex-shrink:0}
+.hamburger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.topbar-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.logo-hex{width:32px;height:32px;flex-shrink:0;background:var(--accent);
+  clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;
+  letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo-place{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px}
+.topbar-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.search-wrap{position:relative;display:none}
+.search-wrap input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px 7px 32px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;
+  outline:none;width:180px;transition:.2s}
+.search-wrap input:focus{border-color:var(--accent);width:210px}
+.search-wrap::before{content:'⌕';position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  color:var(--text3);font-size:15px;pointer-events:none}
+.search-wrap input::placeholder{color:var(--text3)}
+
+/* SIDEBAR DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);
+  z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:270px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:500;
+  transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.sidebar.open{transform:translateX(0)}
+.sidebar-head{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.s-hex{width:40px;height:40px;background:var(--accent);flex-shrink:0;
+  clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);
+  display:flex;align-items:center;justify-content:center;font-size:19px}
+.s-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px}
+.s-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;margin-top:2px}
+.nav{flex:1;overflow-y:auto;padding:10px 0}
+.nav-section{padding:10px 18px 4px;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text3);font-family:'Share Tech Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 18px;cursor:pointer;
+  color:var(--text2);font-size:14px;font-weight:500;border-left:3px solid transparent;transition:.15s}
+.nav-item:active{background:var(--surface2)}
+.nav-item.active{color:var(--accent);background:rgba(249,115,22,.08);border-left-color:var(--accent)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  padding:2px 6px;border-radius:10px;font-family:'Share Tech Mono',monospace}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--border);
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);line-height:1.8}
+.sdot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;
+  margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN */
+.main{padding-top:var(--nav-h);padding-bottom:calc(var(--bnav-h)+4px);min-height:100vh;position:relative;z-index:1}
+.content{padding:14px 12px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--bnav-h);
+  background:var(--surface);border-top:1px solid var(--border);z-index:300;
+  display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;color:var(--text3);font-size:10px;font-family:'Share Tech Mono',monospace;
+  letter-spacing:.5px;transition:color .15s;position:relative;user-select:none}
+.bnav-item.active{color:var(--accent)}
+.bnav-item.active .bi{transform:translateY(-2px)}
+.bi{font-size:20px;transition:transform .2s}
+.bnav-badge{position:absolute;top:4px;right:calc(50% - 18px);background:var(--red);color:#fff;
+  font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;font-family:'Share Tech Mono',monospace}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.page-heading{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px 11px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+.sc-green::after{background:var(--green)} .sc-yellow::after{background:var(--yellow)}
+.sc-red::after{background:var(--red)} .sc-blue::after{background:var(--blue)}
+.stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);
+  font-family:'Share Tech Mono',monospace;margin-bottom:4px}
+.stat-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;line-height:1;margin-bottom:2px}
+.stat-sub{font-size:10px;color:var(--text3)}
+.stat-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:24px;opacity:.1}
+
+/* ALERTS BANNER */
+.alert-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;
+  padding:10px 12px;margin-bottom:14px;font-size:13px}
+.ab-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.ab-names{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* MOBILE SEARCH */
+.msearch{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:9px 12px;margin-bottom:12px}
+.msearch input{background:none;border:none;outline:none;color:var(--text);font-size:14px;
+  font-family:'Barlow',sans-serif;flex:1;padding:0}
+.msearch input::placeholder{color:var(--text3)}
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.filter-row::-webkit-scrollbar{display:none}
+.fpill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);background:var(--surface2);color:var(--text2);
+  white-space:nowrap;font-family:'Barlow',sans-serif;transition:.15s;flex-shrink:0}
+.fpill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ITEM CARDS */
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px;margin-bottom:10px}
+.ic-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+.ic-name{font-weight:600;font-size:14px;line-height:1.3;flex:1}
+.ic-id{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px}
+.ic-body{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px}
+.if-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Share Tech Mono',monospace}
+.if-val{font-size:13px;font-weight:500;margin-top:1px}
+.ic-stock{margin-bottom:10px}
+.stock-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Share Tech Mono',monospace}
+.sn{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:600}
+.sbar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.sfill{height:100%;border-radius:3px;transition:width .3s}
+.ic-actions{display:flex;gap:8px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;
+  font-size:10px;font-weight:700;font-family:'Share Tech Mono',monospace;white-space:nowrap}
+.bg{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.by{background:rgba(234,179,8,.12);color:var(--yellow);border:1px solid rgba(234,179,8,.2)}
+.br{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.bb{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.bgr{background:rgba(148,163,184,.1);color:#94a3b8;border:1px solid rgba(148,163,184,.15)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+  border:none;transition:.15s;font-family:'Barlow',sans-serif;white-space:nowrap;user-select:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{background:#ea6c0d}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:active{background:var(--surface3)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-sm{padding:7px 13px;font-size:12px;border-radius:7px}
+.btn-full{width:100%}
+
+/* SUPPLIER */
+.sup-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px}
+.sup-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:2px}
+.sup-id{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:10px}
+.sup-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.sup-row{display:flex;gap:8px;font-size:13px;color:var(--text2);align-items:flex-start}
+.sup-mats{font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5}
+.sup-actions{display:flex;gap:8px}
+
+/* JOBS */
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.jt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.jtitle{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;line-height:1.3;flex:1}
+.jmeta{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;line-height:1.7}
+.jmat{font-size:12px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(42,47,48,.5)}
+.jmat:last-child{border-bottom:none}
+.pbar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-top:10px}
+.pfill{height:100%;background:var(--accent);border-radius:3px}
+.prow{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px;font-family:'Share Tech Mono',monospace}
+
+/* REPORTS */
+.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.rep-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.5px;color:var(--text2);margin-bottom:10px;text-transform:uppercase}
+.rep-row{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;font-size:13px;border-bottom:1px solid rgba(42,47,48,.5);color:var(--text2)}
+.rep-row:last-child{border-bottom:none}
+.rep-row strong{color:var(--text)}
+
+/* MODAL — bottom sheet */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  z-index:600;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;
+  width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  animation:sheetUp .25s cubic-bezier(.4,0,.2,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhandle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0}
+.mhead{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700}
+.mclose{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1;padding:4px}
+.mbody{padding:16px 18px}
+.mfoot{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px}
+.mfoot .btn{flex:1}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.s2{grid-column:span 2}
+label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Share Tech Mono',monospace}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-size:14px;font-family:'Barlow',sans-serif;
+  outline:none;transition:.2s;width:100%;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--surface2)}
+textarea{resize:vertical;min-height:70px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:calc(var(--bnav-h)+10px);left:12px;right:12px;
+  z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:8px;padding:11px 14px;font-size:13px;pointer-events:all;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);animation:tin .2s ease}
+.toast.success{border-left-color:var(--green)} .toast.error{border-left-color:var(--red)}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.empty{text-align:center;padding:36px 20px;color:var(--text3)}
+.empty .ei{font-size:36px;margin-bottom:8px}
+.empty p{font-size:14px}
+
+/* ═══ DESKTOP ≥768px ═══ */
+@media(min-width:768px){
+  .hamburger{display:none}
+  .sidebar{transform:translateX(0)!important;width:230px;z-index:10}
+  .drawer-overlay{display:none!important}
+  .main{margin-left:230px;padding-top:var(--nav-h);padding-bottom:0}
+  .topbar{left:230px;padding:0 24px}
+  .topbar-logo{display:none}
+  .search-wrap{display:flex}
+  .bottom-nav{display:none}
+  .toast-wrap{bottom:20px;left:auto;right:20px;width:280px}
+  .content{padding:22px 24px}
+  .stats-grid{grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .stat-value{font-size:34px}
+  .msearch{display:none}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .modal{border-radius:12px;width:500px;align-self:center;animation:mIn .2s ease}
+  @keyframes mIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .modal-overlay{align-items:center}
+  .mhandle{display:none}
+  .sup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .sup-card{margin-bottom:0}
+  .jobs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .job-card{margin-bottom:0}
+  .rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .rep-card{margin-bottom:0}
+  .rep-card.wide{grid-column:span 2}
+}
+@media(min-width:1100px){
+  .sidebar{width:240px} .main{margin-left:240px} .topbar{left:240px}
+}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <div class="s-hex">⚙</div>
+    <div><div class="s-name">NILKAMAL</div><div class="s-sub">Engineering · Samastipur</div></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" data-page="dashboard"><span class="nav-icon">▦</span>Dashboard</div>
+    <div class="nav-section">Inventory</div>
+    <div class="nav-item" data-page="materials"><span class="nav-icon">⬡</span>Raw Materials</div>
+    <div class="nav-item" data-page="tools"><span class="nav-icon">🔧</span>Tools & Equipment</div>
+    <div class="nav-item" data-page="consumables"><span class="nav-icon">◈</span>Consumables</div>
+    <div class="nav-item" data-page="finished"><span class="nav-icon">◉</span>Finished Goods</div>
+    <div class="nav-section">Operations</div>
+    <div class="nav-item" data-page="jobs"><span class="nav-icon">📋</span>Job Orders</div>
+    <div class="nav-item" data-page="suppliers"><span class="nav-icon">🏭</span>Suppliers</div>
+    <div class="nav-item" data-page="alerts"><span class="nav-icon">⚠</span>Alerts<span class="nav-badge" id="nav-badge">0</span></div>
+    <div class="nav-item" data-page="reports"><span class="nav-icon">📊</span>Reports</div>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="sdot"></span>ONLINE<br>
+    <span style="color:var(--text2);font-weight:600">Nilkamal Engineering</span><br>
+    📞 8877384707<br>📍 Kalyanpur, Samastipur
+  </div>
+</aside>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="topbar-logo">
+    <div class="logo-hex">⚙</div>
+    <div><div class="logo-name">NILKAMAL ENGINEERING</div><div class="logo-place">Kalyanpur · Samastipur</div></div>
+  </div>
+  <div class="topbar-actions">
+    <div class="search-wrap"><input type="text" id="search-d" placeholder="Search..." oninput="renderAll()"></div>
+    <button class="btn btn-primary btn-sm" id="top-add" onclick="openAddModal()">+ Add</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main"><div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-heading">Dashboard</div>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Item</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card sc-green"><div class="stat-label">Total Items</div><div class="stat-value" id="s-total">0</div><div class="stat-sub">all categories</div><div class="stat-icon">◈</div></div>
+      <div class="stat-card sc-yellow"><div class="stat-label">Low Stock</div><div class="stat-value" id="s-low" style="color:var(--yellow)">0</div><div class="stat-sub">need reorder</div><div class="stat-icon">⚠</div></div>
+      <div class="stat-card sc-red"><div class="stat-label">Out of Stock</div><div class="stat-value" id="s-out" style="color:var(--red)">0</div><div class="stat-sub">unavailable</div><div class="stat-icon">✕</div></div>
+      <div class="stat-card sc-blue"><div class="stat-label">Stock Value</div><div class="stat-value" id="s-val" style="color:var(--blue);font-size:20px">₹0</div><div class="stat-sub">estimated</div><div class="stat-icon">₹</div></div>
+    </div>
+    <div id="dash-banner"></div>
+    <div class="msearch"><span style="color:var(--text3);font-size:16px">⌕</span><input type="text" id="search-m" placeholder="Search inventory..." oninput="renderAll()"></div>
+    <div class="filter-row">
+      <button class="fpill active" onclick="setFilter('all',this)">All</button>
+      <button class="fpill" onclick="setFilter('low',this)">Low Stock</button>
+      <button class="fpill" onclick="setFilter('out',this)">Out of Stock</button>
+      <button class="fpill" onclick="setFilter('ok',this)">In Stock</button>
+    </div>
+    <div id="dash-items"></div>
+  </div>
+
+  <!-- RAW MATERIALS -->
+  <div class="tab-content" id="page-materials">
+    <div class="page-header"><div class="page-heading">Raw Materials</div><button class="btn btn-primary btn-sm" onclick="openAddModal('Raw Material')">+ Add</button></div>
+    <div id="items-materials"></div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="tab-content" id="page-tools">
+    <div class="page-header"><div class="page-heading">Tools & Equipment</div><button class="btn btn-primary btn-sm" onclick="openAddModal('Tool')">+ Add</button></div>
+    <div id="items-tools"></div>
+  </div>
+
+  <!-- CONSUMABLES -->
+  <div class="tab-content" id="page-consumables">
+    <div class="page-header"><div class="page-heading">Consumables</div><button class="btn btn-primary btn-sm" onclick="openAddModal('Consumable')">+ Add</button></div>
+    <div id="items-consumables"></div>
+  </div>
+
+  <!-- FINISHED GOODS -->
+  <div class="tab-content" id="page-finished">
+    <div class="page-header"><div class="page-heading">Finished Goods</div><button class="btn btn-primary btn-sm" onclick="openAddModal('Finished Good')">+ Add</button></div>
+    <div id="items-finished"></div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="tab-content" id="page-jobs">
+    <div class="page-header"><div class="page-heading">Job Orders</div><button class="btn btn-primary btn-sm" onclick="openJobModal()">+ New Job</button></div>
+    <div class="jobs-grid" id="jobs-container"></div>
+  </div>
+
+  <!-- SUPPLIERS -->
+  <div class="tab-content" id="page-suppliers">
+    <div class="page-header"><div class="page-heading">Suppliers</div><button class="btn btn-primary btn-sm" onclick="openSupplierModal()">+ Add Supplier</button></div>
+    <div class="sup-grid" id="suppliers-container"></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="tab-content" id="page-alerts">
+    <div class="page-header"><div class="page-heading">Low Stock Alerts</div></div>
+    <div id="alerts-list"></div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="tab-content" id="page-reports">
+    <div class="page-header">
+      <div class="page-heading">Reports</div>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ Export</button>
+    </div>
+    <div class="rep-grid" id="reports-container"></div>
+  </div>
+
+</div></main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bnav-item active" id="bn-dashboard" onclick="showPage('dashboard')"><span class="bi">▦</span><span>Home</span></div>
+  <div class="bnav-item" id="bn-materials" onclick="showPage('materials')"><span class="bi">⬡</span><span>Stock</span></div>
+  <div class="bnav-item" id="bn-jobs" onclick="showPage('jobs')"><span class="bi">📋</span><span>Jobs</span></div>
+  <div class="bnav-item" id="bn-alerts" onclick="showPage('alerts')"><span class="bi">⚠</span><span>Alerts</span><span class="bnav-badge" id="bnav-badge">0</span></div>
+  <div class="bnav-item" id="bn-more" onclick="toggleSidebar()"><span class="bi">☰</span><span>More</span></div>
+</nav>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhead"><div class="mtitle" id="add-title">Add Item</div><button class="mclose" onclick="closeModal('modal-add')">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg s2"><label>Item Name</label><input id="f-name" placeholder="e.g. MS Flat Bar 50x6mm"></div>
+        <div class="fg"><label>Category</label><select id="f-cat"><option>Raw Material</option><option>Tool</option><option>Consumable</option><option>Finished Good</option></select></div>
+        <div class="fg"><label>Sub-type</label><input id="f-type" placeholder="e.g. Mild Steel"></div>
+        <div class="fg"><label>Quantity</label><input id="f-qty" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label>Min Qty</label><input id="f-min" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label>Unit</label><select id="f-unit"><option>kg</option><option>meters</option><option>pieces</option><option>sheets</option><option>rolls</option><option>liters</option><option>boxes</option><option>sets</option></select></div>
+        <div class="fg"><label>Unit Price (₹)</label><input id="f-price" type="number" min="0" placeholder="0"></div>
+        <div class="fg s2"><label>Supplier</label><input id="f-supplier" placeholder="Supplier name"></div>
+        <div class="fg s2"><label>Notes</label><textarea id="f-notes" placeholder="Notes..."></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-add')">Cancel</button><button class="btn btn-primary" onclick="saveItem()">Save Item</button></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhead"><div class="mtitle">Edit Item</div><button class="mclose" onclick="closeModal('modal-edit')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="ef-id">
+      <div class="fgrid">
+        <div class="fg s2"><label>Item Name</label><input id="ef-name"></div>
+        <div class="fg"><label>Category</label><select id="ef-cat"><option>Raw Material</option><option>Tool</option><option>Consumable</option><option>Finished Good</option></select></div>
+        <div class="fg"><label>Sub-type</label><input id="ef-type"></div>
+        <div class="fg"><label>Quantity</label><input id="ef-qty" type="number" min="0"></div>
+        <div class="fg"><label>Min Qty</label><input id="ef-min" type="number" min="0"></div>
+        <div class="fg"><label>Unit</label><select id="ef-unit"><option>kg</option><option>meters</option><option>pieces</option><option>sheets</option><option>rolls</option><option>liters</option><option>boxes</option><option>sets</option></select></div>
+        <div class="fg"><label>Unit Price (₹)</label><input id="ef-price" type="number" min="0"></div>
+        <div class="fg s2"><label>Supplier</label><input id="ef-supplier"></div>
+        <div class="fg s2"><label>Notes</label><textarea id="ef-notes"></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-edit')">Cancel</button><button class="btn btn-primary" onclick="updateItem()">Update</button></div>
+  </div>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal-overlay" id="modal-job">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhead"><div class="mtitle">New Job Order</div><button class="mclose" onclick="closeModal('modal-job')">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg s2"><label>Job Title</label><input id="jf-title" placeholder="e.g. Steel Gate Fabrication"></div>
+        <div class="fg"><label>Client</label><input id="jf-client" placeholder="Client name"></div>
+        <div class="fg"><label>Due Date</label><input id="jf-due" type="date"></div>
+        <div class="fg"><label>Status</label><select id="jf-status"><option>In Progress</option><option>Pending</option><option>Completed</option><option>On Hold</option></select></div>
+        <div class="fg"><label>Progress %</label><input id="jf-progress" type="number" min="0" max="100" placeholder="0"></div>
+        <div class="fg s2"><label>Materials Used (comma separated)</label><input id="jf-mats" placeholder="MS Flat Bar - 20kg, Welding Rods - 5kg"></div>
+        <div class="fg s2"><label>Job Value (₹)</label><input id="jf-value" type="number" placeholder="0"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-job')">Cancel</button><button class="btn btn-primary" onclick="saveJob()">Create Job</button></div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div class="modal-overlay" id="modal-supplier">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhead"><div class="mtitle">Add Supplier</div><button class="mclose" onclick="closeModal('modal-supplier')">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg s2"><label>Company Name</label><input id="sf-name" placeholder="Company name"></div>
+        <div class="fg"><label>Contact Person</label><input id="sf-contact" placeholder="Name"></div>
+        <div class="fg"><label>Phone</label><input id="sf-phone" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="fg s2"><label>Materials Supplied</label><input id="sf-mats" placeholder="MS Sheets, Angles, etc."></div>
+        <div class="fg s2"><label>Address</label><textarea id="sf-addr" placeholder="Full address..."></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-supplier')">Cancel</button><button class="btn btn-primary" onclick="saveSupplier()">Add Supplier</button></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// DATA
+let inventory=[
+  {id:1,name:'MS Flat Bar 50x6mm',category:'Raw Material',type:'Mild Steel',qty:45,min:20,unit:'kg',price:62,supplier:'Ravi Raj Traders',notes:'25x6mm also in stock'},
+  {id:2,name:'MS Sheet 2mm',category:'Raw Material',type:'Mild Steel',qty:8,min:15,unit:'sheets',price:1800,supplier:'Ravi Raj Traders',notes:'3mm and 5mm variants available'},
+  {id:3,name:'Angle Iron 40x40x4',category:'Raw Material',type:'Mild Steel',qty:120,min:30,unit:'kg',price:58,supplier:'Ravi Raj Traders',notes:''},
+  {id:4,name:'Aluminium Sheet 1.5mm',category:'Raw Material',type:'Aluminium',qty:0,min:10,unit:'sheets',price:3200,supplier:'Rishav Enterprises',notes:'Out of stock - reorder immediately'},
+  {id:5,name:'SS Pipe 1 inch',category:'Raw Material',type:'Stainless Steel',qty:22,min:10,unit:'meters',price:185,supplier:'Rishav Enterprises',notes:''},
+  {id:6,name:'Welding Rods 3.15mm',category:'Consumable',type:'Welding',qty:3,min:10,unit:'kg',price:120,supplier:'Nilkamal Traders',notes:'Running very low'},
+  {id:7,name:'Grinding Disc 4"',category:'Consumable',type:'Abrasive',qty:24,min:20,unit:'pieces',price:45,supplier:'Nilkamal Traders',notes:''},
+  {id:8,name:'Cutting Disc 4"',category:'Consumable',type:'Abrasive',qty:18,min:20,unit:'pieces',price:35,supplier:'Nilkamal Traders',notes:''},
+  {id:9,name:'Welding Wire MIG 0.8mm',category:'Consumable',type:'Welding',qty:2,min:5,unit:'rolls',price:1400,supplier:'Nilkamal Traders',notes:''},
+  {id:10,name:'Angle Grinder 4"',category:'Tool',type:'Power Tool',qty:3,min:2,unit:'pieces',price:2800,supplier:'—',notes:'2 operational, 1 needs repair'},
+  {id:11,name:'Arc Welding Machine',category:'Tool',type:'Welding Equipment',qty:2,min:1,unit:'pieces',price:18000,supplier:'—',notes:'Both operational'},
+  {id:12,name:'Drill Machine',category:'Tool',type:'Power Tool',qty:2,min:1,unit:'pieces',price:4500,supplier:'—',notes:''},
+  {id:13,name:'Steel Gate (Custom)',category:'Finished Good',type:'Gate',qty:2,min:0,unit:'pieces',price:12000,supplier:'—',notes:'Ready for delivery - Rajan Builders'},
+  {id:14,name:'MS Fabricated Shelf',category:'Finished Good',type:'Shelving',qty:5,min:0,unit:'pieces',price:3500,supplier:'—',notes:'Warehouse order'},
+];
+let jobs=[
+  {id:'JOB-001',title:'Security Gate - Rajan Builders',client:'Rajan Builders',due:'2025-05-15',status:'In Progress',materials:['MS Flat Bar - 40kg','MS Sheet 2mm - 6 sheets','Welding Rods - 3kg'],progress:75,value:45000},
+  {id:'JOB-002',title:'Factory Shelving - Garg Industries',client:'Garg Industries',due:'2025-05-20',status:'In Progress',materials:['Angle Iron 40x40 - 80kg','MS Sheet 3mm - 10 sheets'],progress:40,value:38000},
+  {id:'JOB-003',title:'Staircase Railing',client:'Priya Homes',due:'2025-05-28',status:'Pending',materials:['SS Pipe 1 inch - 15m','MS Flat - 10kg'],progress:0,value:22000},
+  {id:'JOB-004',title:'Truck Body Repair',client:'Singh Transport',due:'2025-05-10',status:'Completed',materials:['MS Sheet 2mm - 4 sheets','Welding Wire - 1 roll'],progress:100,value:15000},
+];
+let suppliers=[
+  {id:1,name:'Ravi Raj Traders',contact:'Ravi Raj',phone:'+91 9507733770',materials:'MS Sheets, Flat Bars, Angles, Channels',address:'Lohiya Nagar, Begusarai'},
+  {id:2,name:'Rishav Enterprises',contact:'Suresh Verma',phone:'+91 87654 32109',materials:'Aluminium, SS Products, Special Alloys',address:'Kalyanpur, Samastipur'},
+  {id:3,name:'Nilkamal Traders',contact:'Rajesh Kumar',phone:'+91 7903158756',materials:'Welding Rods, MIG Wire, Grinding Discs, Safety Gear',address:'Lohiya Nagar, Begusarai'},
+];
+let nextId=15, activeFilter='all';
+
+// HELPERS
+function getStatus(i){
+  if(i.qty===0)return{label:'Out of Stock',cls:'br'};
+  if(i.qty<=i.min)return{label:'Low Stock',cls:'by'};
+  return{label:'In Stock',cls:'bg'};
+}
+function getCol(i){
+  if(i.qty===0)return'#ef4444';
+  if(i.qty<=i.min)return'#eab308';
+  return'#22c55e';
+}
+function getPct(i){if(i.min===0)return 100;return Math.min(100,Math.round(i.qty/(i.min*2)*100));}
+function getQ(){const m=document.getElementById('search-m');const d=document.getElementById('search-d');return((m&&m.value)||(d&&d.value)||'').toLowerCase();}
+
+// NAV
+function showPage(page){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const ni=document.querySelector(`.nav-item[data-page="${page}"]`);if(ni)ni.classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const bi=document.getElementById('bn-'+page);if(bi)bi.classList.add('active');
+  closeSidebar();renderAll();
+}
+document.querySelectorAll('.nav-item[data-page]').forEach(el=>el.addEventListener('click',()=>showPage(el.dataset.page)));
+
+// SIDEBAR
+function toggleSidebar(){document.getElementById('sidebar').classList.contains('open')?closeSidebar():openSidebar();}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('drawer-overlay').classList.add('open');document.getElementById('hamburger').classList.add('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');document.getElementById('hamburger').classList.remove('open');}
+
+// ITEM CARD
+function itemCard(item){
+  const st=getStatus(item),col=getCol(item),pct=getPct(item);
+  return`<div class="item-card">
+    <div class="ic-top">
+      <div><div class="ic-name">${item.name}</div><div class="ic-id">ID-${String(item.id).padStart(4,'0')} · ${item.type}</div></div>
+      <span class="badge ${st.cls}">${st.label}</span>
+    </div>
+    <div class="ic-body">
+      <div><div class="if-label">Category</div><div class="if-val"><span class="badge bgr">${item.category}</span></div></div>
+      <div><div class="if-label">Supplier</div><div class="if-val" style="font-size:12px;color:var(--text2)">${item.supplier}</div></div>
+      <div><div class="if-label">Unit Price</div><div class="if-val">₹${Number(item.price).toLocaleString('en-IN')}</div></div>
+      <div><div class="if-label">Unit</div><div class="if-val">${item.unit}</div></div>
+    </div>
+    <div class="ic-stock">
+      <div class="stock-row"><span class="sl">Stock</span><span class="sn" style="color:${col}">${item.qty} / ${item.min} ${item.unit}</span></div>
+      <div class="sbar"><div class="sfill" style="width:${pct}%;background:${col}"></div></div>
+    </div>
+    ${item.notes?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">${item.notes}</div>`:''}
+    <div class="ic-actions">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditModal(${item.id})">✏ Edit</button>
+      <button class="btn btn-danger btn-sm" style="flex:1" onclick="deleteItem(${item.id})">🗑 Delete</button>
+    </div>
+  </div>`;
+}
+
+function renderItems(containerId,cat){
+  let items=[...inventory];
+  if(cat)items=items.filter(i=>i.category===cat);
+  const q=getQ();
+  if(q)items=items.filter(i=>i.name.toLowerCase().includes(q)||i.type.toLowerCase().includes(q)||i.supplier.toLowerCase().includes(q));
+  if(activeFilter==='low')items=items.filter(i=>i.qty<=i.min&&i.qty>0);
+  if(activeFilter==='ok')items=items.filter(i=>i.qty>i.min);
+  if(activeFilter==='out')items=items.filter(i=>i.qty===0);
+  const el=document.getElementById(containerId);if(!el)return;
+  el.innerHTML=items.length?items.map(itemCard).join(''):`<div class="empty"><div class="ei">⬡</div><p>No items found</p></div>`;
+}
+
+function renderDashboard(){
+  const total=inventory.length,low=inventory.filter(i=>i.qty<=i.min&&i.qty>0).length,
+    out=inventory.filter(i=>i.qty===0).length,val=inventory.reduce((s,i)=>s+(i.qty*i.price),0);
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-low').textContent=low;
+  document.getElementById('s-out').textContent=out;
+  document.getElementById('s-val').textContent='₹'+val.toLocaleString('en-IN');
+  const badge=low+out;
+  ['nav-badge','bnav-badge'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=badge;});
+  const critical=inventory.filter(i=>i.qty===0||i.qty<=i.min);
+  const b=document.getElementById('dash-banner');
+  if(critical.length>0){
+    b.innerHTML=`<div class="alert-banner">
+      <div class="ab-row"><div><strong style="color:var(--red)">⚠ ${critical.length} items</strong> need attention</div>
+      <button class="btn btn-ghost btn-sm" onclick="showPage('alerts')">View All</button></div>
+      <div class="ab-names">${critical.slice(0,3).map(i=>`<span style="color:var(--yellow)">${i.name}</span>`).join(', ')}${critical.length>3?' +more':''}</div>
+    </div>`;
+  }else{b.innerHTML='';}
+  renderItems('dash-items',null);
+}
+
+function renderAlerts(){
+  const critical=inventory.filter(i=>i.qty===0||i.qty<=i.min);
+  const el=document.getElementById('alerts-list');
+  if(!critical.length){el.innerHTML=`<div class="empty"><div class="ei">✅</div><p>All stock healthy!</p></div>`;return;}
+  el.innerHTML=critical.map(item=>{
+    const st=getStatus(item),col=getCol(item);
+    return`<div class="item-card" style="border-left:3px solid ${col}">
+      <div class="ic-top">
+        <div><div class="ic-name">${item.name}</div><div class="ic-id">${item.category} · ${item.supplier}</div></div>
+        <span class="badge ${st.cls}">${st.label}</span>
+      </div>
+      <div class="ic-body">
+        <div><div class="if-label">Current Stock</div><div class="if-val" style="color:${col};font-family:'Share Tech Mono',monospace">${item.qty} ${item.unit}</div></div>
+        <div><div class="if-label">Minimum Stock</div><div class="if-val" style="font-family:'Share Tech Mono',monospace">${item.min} ${item.unit}</div></div>
+      </div>
+      <button class="btn btn-primary btn-full btn-sm" onclick="openEditModal(${item.id})">📦 Restock Now</button>
+    </div>`;
+  }).join('');
+}
+
+function renderJobs(){
+  const sc={'In Progress':'bb','Pending':'by','Completed':'bg','On Hold':'bgr'};
+  document.getElementById('jobs-container').innerHTML=jobs.map(j=>`
+    <div class="job-card">
+      <div class="jt"><div class="jtitle">${j.title}</div><span class="badge ${sc[j.status]||'bgr'}">${j.status}</span></div>
+      <div class="jmeta">${j.id} · ${j.client}<br>Due: ${j.due} · ₹${Number(j.value).toLocaleString('en-IN')}</div>
+      <div>${j.materials.map(m=>`<div class="jmat">▸ ${m}</div>`).join('')}</div>
+      <div class="pbar"><div class="pfill" style="width:${j.progress}%"></div></div>
+      <div class="prow"><span>PROGRESS</span><span>${j.progress}%</span></div>
+    </div>`).join('');
+}
+
+function renderSuppliers(){
+  document.getElementById('suppliers-container').innerHTML=suppliers.map(s=>`
+    <div class="sup-card">
+      <div class="sup-name">${s.name}</div>
+      <div class="sup-id">VENDOR-${String(s.id).padStart(3,'0')}</div>
+      <div class="sup-rows">
+        <div class="sup-row">👤 <span>${s.contact}</span></div>
+        <div class="sup-row">📞 <span>${s.phone}</span></div>
+        <div class="sup-row">📍 <span>${s.address}</span></div>
+      </div>
+      <div class="sup-mats"><strong style="color:var(--text2)">Supplies:</strong> ${s.materials}</div>
+      <div class="sup-actions">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="window.open('tel:${s.phone.replace(/\s/g,'')}')">📞 Call</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${s.id})">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderReports(){
+  const bc={};
+  inventory.forEach(i=>{if(!bc[i.category])bc[i.category]={count:0,value:0,low:0};bc[i.category].count++;bc[i.category].value+=i.qty*i.price;if(i.qty<=i.min)bc[i.category].low++;});
+  const tv=inventory.reduce((s,i)=>s+i.qty*i.price,0);
+  const crit=inventory.filter(i=>i.qty===0||i.qty<=i.min);
+  document.getElementById('reports-container').innerHTML=`
+    <div class="rep-card wide">
+      <div class="rep-title">📊 Stock by Category</div>
+      ${Object.entries(bc).map(([cat,d])=>`<div class="rep-row"><span>${cat}</span><span>${d.count} items</span><span style="color:var(--yellow)">${d.low} low</span><strong>₹${d.value.toLocaleString('en-IN')}</strong></div>`).join('')}
+      <div class="rep-row" style="border-top:1px solid var(--accent);margin-top:6px;padding-top:10px"><strong>Total Value</strong><strong style="color:var(--accent)">₹${tv.toLocaleString('en-IN')}</strong></div>
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">🔴 Critical Items</div>
+      ${crit.length?crit.map(i=>`<div class="rep-row"><span style="font-size:12px">${i.name}</span><strong style="color:${getCol(i)}">${i.qty===0?'OUT':i.qty+' '+i.unit}</strong></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">All OK ✓</div>'}
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">💼 Active Jobs</div>
+      ${jobs.filter(j=>j.status!=='Completed').map(j=>`<div class="rep-row"><span style="font-size:12px">${j.title}</span><strong style="color:var(--blue)">${j.progress}%</strong></div>`).join('')}
+      <div class="rep-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px"><span>Total Value</span><strong style="color:var(--green)">₹${jobs.reduce((s,j)=>s+j.value,0).toLocaleString('en-IN')}</strong></div>
+    </div>`;
+}
+
+function renderAll(){
+  renderDashboard();
+  renderItems('items-materials','Raw Material');
+  renderItems('items-tools','Tool');
+  renderItems('items-consumables','Consumable');
+  renderItems('items-finished','Finished Good');
+  renderJobs();renderSuppliers();renderAlerts();renderReports();
+}
+
+function setFilter(f,el){activeFilter=f;document.querySelectorAll('.fpill').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderItems('dash-items',null);}
+
+// MODALS
+function openAddModal(cat){if(cat)document.getElementById('f-cat').value=cat;document.getElementById('add-title').textContent='Add '+(cat||'Item');document.getElementById('modal-add').classList.add('open');}
+function openEditModal(id){const item=inventory.find(i=>i.id===id);if(!item)return;
+  document.getElementById('ef-id').value=id;document.getElementById('ef-name').value=item.name;
+  document.getElementById('ef-cat').value=item.category;document.getElementById('ef-type').value=item.type;
+  document.getElementById('ef-qty').value=item.qty;document.getElementById('ef-min').value=item.min;
+  document.getElementById('ef-unit').value=item.unit;document.getElementById('ef-price').value=item.price;
+  document.getElementById('ef-supplier').value=item.supplier;document.getElementById('ef-notes').value=item.notes;
+  document.getElementById('modal-edit').classList.add('open');}
+function openJobModal(){document.getElementById('modal-job').classList.add('open');}
+function openSupplierModal(){document.getElementById('modal-supplier').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// CRUD
+function saveItem(){
+  const name=document.getElementById('f-name').value.trim();if(!name){toast('Enter item name','error');return;}
+  inventory.push({id:nextId++,name,category:document.getElementById('f-cat').value,type:document.getElementById('f-type').value.trim()||'General',qty:Number(document.getElementById('f-qty').value)||0,min:Number(document.getElementById('f-min').value)||0,unit:document.getElementById('f-unit').value,price:Number(document.getElementById('f-price').value)||0,supplier:document.getElementById('f-supplier').value.trim()||'—',notes:document.getElementById('f-notes').value.trim()});
+  closeModal('modal-add');['f-name','f-type','f-qty','f-min','f-price','f-supplier','f-notes'].forEach(id=>document.getElementById(id).value='');
+  renderAll();toast('Item added!','success');
+}
+function updateItem(){
+  const id=Number(document.getElementById('ef-id').value),idx=inventory.findIndex(i=>i.id===id);if(idx===-1)return;
+  inventory[idx]={...inventory[idx],name:document.getElementById('ef-name').value.trim(),category:document.getElementById('ef-cat').value,type:document.getElementById('ef-type').value.trim(),qty:Number(document.getElementById('ef-qty').value)||0,min:Number(document.getElementById('ef-min').value)||0,unit:document.getElementById('ef-unit').value,price:Number(document.getElementById('ef-price').value)||0,supplier:document.getElementById('ef-supplier').value.trim(),notes:document.getElementById('ef-notes').value.trim()};
+  closeModal('modal-edit');renderAll();toast('Updated!','success');
+}
+function deleteItem(id){if(!confirm('Delete this item?'))return;inventory=inventory.filter(i=>i.id!==id);renderAll();toast('Deleted','error');}
+function saveJob(){
+  const title=document.getElementById('jf-title').value.trim();if(!title){toast('Enter job title','error');return;}
+  jobs.push({id:'JOB-'+String(jobs.length+1).padStart(3,'0'),title,client:document.getElementById('jf-client').value.trim()||'Unknown',due:document.getElementById('jf-due').value||'—',status:document.getElementById('jf-status').value,materials:document.getElementById('jf-mats').value.split(',').map(s=>s.trim()).filter(Boolean),progress:Number(document.getElementById('jf-progress').value)||0,value:Number(document.getElementById('jf-value').value)||0});
+  closeModal('modal-job');renderAll();toast('Job created!','success');
+}
+function saveSupplier(){
+  const name=document.getElementById('sf-name').value.trim();if(!name){toast('Enter supplier name','error');return;}
+  suppliers.push({id:suppliers.length+1,name,contact:document.getElementById('sf-contact').value.trim()||'—',phone:document.getElementById('sf-phone').value.trim()||'—',materials:document.getElementById('sf-mats').value.trim()||'—',address:document.getElementById('sf-addr').value.trim()||'—'});
+  closeModal('modal-supplier');renderAll();toast('Supplier added!','success');
+}
+function deleteSupplier(id){if(!confirm('Remove supplier?'))return;suppliers=suppliers.filter(s=>s.id!==id);renderAll();toast('Removed','error');}
+function exportCSV(){
+  const h=['ID','Name','Category','Type','Qty','Min','Unit','Price','Supplier','Notes'];
+  const r=inventory.map(i=>[i.id,i.name,i.category,i.type,i.qty,i.min,i.unit,i.price,i.supplier,i.notes]);
+  const csv=[h,...r].map(row=>row.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nilkamal-inventory.csv';a.click();
+  toast('Exported!','success');
+}
+function toast(msg,type='success'){
+  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;
+  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+renderAll();
+</script>
+</body>
+</html>
